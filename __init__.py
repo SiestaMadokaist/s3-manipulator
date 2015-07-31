@@ -1,0 +1,1 @@
+from manipulator import S3Manipulator
