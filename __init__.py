@@ -1,1 +1,1 @@
-from manipulator import S3Manipulator
+from .manipulator import S3Manipulator
