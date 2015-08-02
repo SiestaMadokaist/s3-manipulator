@@ -72,30 +72,30 @@ class S3Manipulator:
 						yield fname
 		return list(file_generator(self.root))
 
-	def upload_to(self, bucket_name, prefix="", silent=False, **kwargs):
+	def upload_to(self, bucket_name, path_formatter=None, silent=False, **kwargs):
+		_path_formatter = S3Manipulator.default_path_formatter if path_formatter is None else path_formatter
 		if(not silent):
-			self._noisy_upload(bucket_name, prefix, **kwargs)
+			return self._noisy_upload(bucket_name, _path_formatter, **kwargs)
 		else:
 			bucket = S3.Bucket(bucket_name)
 			for item in self.items:
-				bucket.put_object(Body=open(item), Key=self.key_for(prefix, item), ContentType=S3Manipulator.guess_content_type(item));
+				bucket.put_object(Body=open(item), Key=_path_formatter(item), ContentType=S3Manipulator.guess_content_type(item));
 
-	def _noisy_upload(self, bucket_name, prefix="", **kwargs):
+	def _noisy_upload(self, bucket_name, path_formatter, **kwargs):
 		bucket = S3.Bucket(bucket_name)
 		for i, item in enumerate(self.items):
 			body = open(item, 'rb')
-			key = self.key_for(prefix, item)
+			key = path_formatter(item)
+			print("{} => {}".format(body, key))
 			s3obj = bucket.put_object(Body=body, Key=key, ContentType=S3Manipulator.guess_content_type(item), **kwargs)
-			print("{}.uploaded: {}\n{}\n".format(i, body, key))
 
-	def key_for(self, prefix, item):
-		joined = os.path.join(prefix, item)
-		return re.sub(r"^\./", "", joined)
+	def default_path_formatter(item):
+		return re.sub(r"^\./", "", item)
 
 
 def main():
 	manipulator = S3Manipulator(filter_regexs=[".js$", ".css$", ".txt$"]).filter(".py$").reject("uploader").reject("req")
-	print(manipulator.items)
+	manipulator.upload_to("ramadoka.mivo.cf")
 
 
 if __name__ == '__main__':
