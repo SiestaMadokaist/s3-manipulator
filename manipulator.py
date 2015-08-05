@@ -44,6 +44,7 @@ class S3Manipulator:
 		reject_regexs=DefaultRejectRegex,
 	):
 		self.root = local_root
+		assert len(filter_regexs) > 0, "filter_regexs can't be empty"
 		self.filter_regexs = self.regex_compile(filter_regexs)
 		self.reject_regexs = self.regex_compile(reject_regexs)
 
@@ -94,7 +95,8 @@ class S3Manipulator:
 
 
 def main():
-	manipulator = S3Manipulator(filter_regexs=[".js$", ".css$", ".txt$"]).filter(".py$").reject("uploader").reject("req")
+	manipulator = S3Manipulator()
+	# manipulator = S3Manipulator(filter_regexs=[".js$", ".css$", ".txt$"]).filter(".py$").reject("uploader").reject("req")
 	manipulator.upload_to("ramadoka.mivo.cf")
 
 
